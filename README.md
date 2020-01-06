@@ -3,7 +3,7 @@
 Baobabs are deciduous trees found in Africa, Arabia, Australia, and
 Madagascar. [*Adansonia grandidieri*](https://en.wikipedia.org/wiki/Adansonia_grandidieri),
 the largest of the baobabs, has a long, thick trunk devoid of branches
-followed by a shallow, wide flat-topped crown.
+followed by a wide, flat-topped crown.
 
 `baobab`, on the other hand, is an implementation of an 
 [Adaptive Radix Tree](https://db.in.tum.de/~leis/papers/ART.pdf) (ART) in
@@ -17,7 +17,7 @@ One of the key optimizations from the ART paper is *path compression*, which
 allows a node to contain a "prefix" that precedes its branches.  Having a long
 prefix makes a node look like an upsided down baobab tree.
 
-## When to use a trie?
+## When are tries applicable?
 ...
 
 
