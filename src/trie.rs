@@ -1,7 +1,8 @@
 use crate::packed_node::PackedNode;
+use std::io;
 
 pub struct Trie<T> {
-    root: PackedNode<T>,
+    pub(crate) root: PackedNode<T>,
 }
 
 impl<T> Trie<T> {
@@ -39,63 +40,51 @@ impl<T> Trie<T> {
         self.root.insert(key, value)
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (Vec<u8>, &T)> {
-        #[derive(Clone, Copy)]
-        enum State {
-            Start,
-            Recurse(Option<u8>),
-            PopByte(Option<u8>),
-        }
-
-        struct TreeIterator<'a, T> {
-            key: Vec<u8>,
-            stack: Vec<(&'a PackedNode<T>, State)>,
-        }
-        impl<'a, T> Iterator for TreeIterator<'a, T> {
-            type Item = (Vec<u8>, &'a T);
-            fn next(&mut self) -> Option<Self::Item> {
-                loop {
-                    let (node, state) = self.stack.last_mut()?;
-                    match *state {
-                        State::Start => {
-                            *state = State::Recurse(Some(0));
-
-                            for &byte in node.prefix() {
-                                self.key.push(byte);
-                            }
-                            if let Some(val) = node.value() {
-                                return Some((self.key.clone(), val));
-                            }
-                        }
-                        State::Recurse(Some(i)) => {
-                            let next_ix = i.checked_add(1);
-                            if let Some(child) = node.lookup(i) {
-                                *state = State::PopByte(next_ix);
-                                self.key.push(i);
-                                self.stack.push((child, State::Start));
-                            } else {
-                                *state = State::Recurse(next_ix);
-                            }
-                        }
-                        State::PopByte(next_ix) => {
-                            self.key.pop();
-                            *state = State::Recurse(next_ix);
-                        }
-                        State::Recurse(None) => {
-                            self.key.truncate(self.key.len() - node.prefix().len());
-                            self.stack.pop();
-                        }
-                    }
-                }
-            }
-        }
-        TreeIterator {
-            key: vec![],
-            stack: vec![(&self.root, State::Start)],
-        }
-    }
-
     pub fn remove(&mut self, key: &[u8]) -> Option<T> {
         self.root.remove(key)
+    }
+
+    pub fn debug(&self, out: &mut impl io::Write) -> io::Result<()> {
+        self.root.debug("", out)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Trie;
+    use std::io;
+
+
+    #[test]
+    fn test_insert() {
+        let mut t = Trie::new();
+        t.insert(&[1, 2, 3], ());
+        t.insert(&[1, 2, 4], ());
+        t.insert(&[1, 2, 3, 5], ());
+        t.insert(&[1, 2], ());
+
+        for (k, v) in t.iter() {
+            eprintln!("{:?} -> {:?}", k, v);
+        }
+
+        let n = 35;
+        for i in 2..n {
+            t.insert(&[i], ());
+        }
+
+        assert!(t.get(&[1, 2, 3]).is_some());
+        assert!(t.get(&[1, 2, 4]).is_some());
+        assert!(t.get(&[1, 2, 5]).is_none());
+        assert!(t.get(&[1, 2, 3, 4]).is_none());
+        assert!(t.get(&[1, 2, 3, 5]).is_some());
+        assert!(t.get(&[1, 2]).is_some());
+        assert!(t.get(&[]).is_none());
+
+        for i in 2..n {
+            assert!(t.get(&[i]).is_some());
+        }
+        assert!(t.get(&[n + 1]).is_none());
+
+        eprintln!("root {:?}", t.debug(&mut io::stdout().lock()));
     }
 }

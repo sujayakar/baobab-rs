@@ -183,7 +183,7 @@ impl<T> NodeChildren<T> {
         }
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         match self {
             NodeChildren::Empty => 0,
             NodeChildren::Pairs { keys, .. } => keys.len(),

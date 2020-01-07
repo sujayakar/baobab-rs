@@ -11,6 +11,8 @@
 // [ ] Dedup code to determine child variant
 // [ ] Split up into nice modules
 // [ ] Use a macro to get rid of the unsafety in lookup
+// [ ] Remove the into/from pairs stuff
+// [ ] Trie debug skips test capture
 //
 // # Performance
 // [X] Pack header tighter
@@ -29,6 +31,7 @@
 // [ ] Merge two tries?
 // [ ] Split a trie?
 // [ ] Node annotation?
+// [ ] Implement clone
 //
 // # Testing
 // [ ] Add memory report (w/external fragmentation?)
@@ -49,12 +52,25 @@
 // [ ] Add dealloc in place perhaps?
 // [ ] DSL for specifying packed structures?  See packed2.rs
 //
+// [ ] License under apache or mit at convenience
+// [ ] contributions under apache
+#![feature(test)]
+
+#[cfg(test)]
+#[macro_use(quickcheck)]
+extern crate quickcheck_macros;
 
 mod bitset;
 mod header;
+mod iter;
+mod insert;
 mod node;
 mod packable;
 mod packed_node;
+mod remove;
 mod trie;
+
+#[cfg(test)]
+mod qc_tests;
 
 pub use trie::Trie;

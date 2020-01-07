@@ -58,7 +58,7 @@ impl<T> fmt::Debug for NodeHeader<T> {
 
 impl<T> NodeHeader<T> {
     pub fn new(prefix_len: usize, num_children: usize, has_value: bool) -> Self {
-        assert!(prefix_len < 64);
+        assert!(prefix_len < 64, "FIXME");
         let mut prefix_byte = prefix_len as u8;
         let children_byte;
         if num_children == 256 {
