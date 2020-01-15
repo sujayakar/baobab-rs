@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::mem;
 
 use crate::bitset::Bitset;
-use crate::header::{NodeHeader, NodeChildrenType};
+use crate::header::{MAX_PREFIX_LEN, NodeHeader, NodeChildrenType};
 use crate::packable::PackableStruct;
 use crate::packed_node::PackedNode;
 
@@ -10,6 +10,25 @@ pub struct Node<T> {
     pub prefix: Vec<u8>,
     pub children: NodeChildren<T>,
     pub value: Option<T>,
+}
+
+impl<T> Node<T> {
+    pub fn new(prefix: Vec<u8>, children: NodeChildren<T>, value: Option<T>) -> Self {
+        if prefix.len() > MAX_PREFIX_LEN {
+            let (&branch, suffix) = prefix[MAX_PREFIX_LEN..].split_first().unwrap();
+            let child = Node::new(suffix.to_owned(), children, value);
+            return Node {
+                prefix: prefix[..MAX_PREFIX_LEN].to_owned(),
+                children: NodeChildren::one(branch, PackedNode::new(child)),
+                value: None,
+            };
+        }
+        Node { prefix, children, value }
+    }
+
+    pub fn prefix(&self) -> &[u8] {
+        &self.prefix[..]
+    }
 }
 
 impl<T> PackableStruct for Node<T> {

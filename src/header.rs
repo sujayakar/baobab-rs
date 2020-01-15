@@ -8,6 +8,8 @@ use std::ops::Range;
 use crate::packable::Header;
 use crate::packed_node::PackedNode;
 
+pub const MAX_PREFIX_LEN: usize = 64 - 1;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum NodeChildrenType {
     Empty,
@@ -58,7 +60,7 @@ impl<T> fmt::Debug for NodeHeader<T> {
 
 impl<T> NodeHeader<T> {
     pub fn new(prefix_len: usize, num_children: usize, has_value: bool) -> Self {
-        assert!(prefix_len < 64, "FIXME");
+        assert!(prefix_len < MAX_PREFIX_LEN);
         let mut prefix_byte = prefix_len as u8;
         let children_byte;
         if num_children == 256 {

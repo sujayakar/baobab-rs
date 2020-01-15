@@ -50,15 +50,15 @@ impl<T> PackedNode<T> {
                         let child = packed_child.take();
 
                         prefix.push(child_byte);
-                        prefix.extend_from_slice(&child.prefix[..]);
+                        prefix.extend_from_slice(child.prefix());
 
-                        let new_node = Node { prefix, children: child.children, value: child.value };
+                        let new_node = Node::new(prefix, child.children, child.value);
                         *self = PackedNode::new(new_node);
                         return Some(value);
                     },
                     _ => {
                         let children = NodeChildren::from_pairs(pairs);
-                        *self = PackedNode::new(Node { prefix, children, value: None });
+                        *self = PackedNode::new(Node::new(prefix, children, None));
                         return Some(value);
                     },
                 }
@@ -84,9 +84,9 @@ impl<T> PackedNode<T> {
                 let child = packed_child.take();
 
                 prefix.push(child_byte);
-                prefix.extend_from_slice(&child.prefix[..]);
+                prefix.extend_from_slice(child.prefix());
 
-                let new_node = Node { prefix, children: child.children, value: child.value };
+                let new_node = Node::new(prefix, child.children, child.value);
                 *self = PackedNode::new(new_node);
                 return Some(removed_value);
             },
@@ -94,7 +94,7 @@ impl<T> PackedNode<T> {
             (true, _) | (false, _) => {
                 assert!(!pairs.contains_key(&branch_byte));
                 let children = NodeChildren::from_pairs(pairs);
-                let new_node = Node { prefix, children, value };
+                let new_node = Node::new(prefix, children, value);
                 *self = PackedNode::new(new_node);
                 return Some(removed_value);
             }

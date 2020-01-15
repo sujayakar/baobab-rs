@@ -132,17 +132,10 @@ impl<R: Rng> Simulation<R> {
 
 #[test]
 fn test_simulation() {
-    for i in 0.. {
-        let seed = rand::thread_rng().gen();
-        // let seed = [139, 152, 242, 158, 126, 69, 216, 91, 103, 148, 39, 223, 90, 83, 109, 211, 66, 208, 166, 48, 130, 40, 34, 228, 13, 186, 56, 4, 249, 246, 124, 53];
-
-        if i % 100 == 0 {
-            eprintln!("Using seed {:?}", seed);
-        }
-        let mut s = Simulation::new(StdRng::from_seed(seed));
-        for i in 0..100 {
-            s.step();
-        }
+    let seed = rand::thread_rng().gen();
+    let mut s = Simulation::new(StdRng::from_seed(seed));
+    for _ in 0..100 {
+        s.step();
     }
 }
 

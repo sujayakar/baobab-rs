@@ -42,11 +42,7 @@ impl<T> PackedNode<T> {
             children,
             value: old_value,
         } = self.take();
-        let new_node = Node {
-            prefix,
-            children,
-            value: new_value,
-        };
+        let new_node = Node::new(prefix, children, new_value);
         *self = PackedNode::new(new_node);
         old_value
     }
@@ -59,11 +55,7 @@ impl<T> PackedNode<T> {
         } = self.take();
         let mut pairs = children.into_pairs();
         assert!(pairs.insert(key, PackedNode::new(child)).is_none());
-        let new_node = Node {
-            prefix,
-            value,
-            children: NodeChildren::from_pairs(pairs),
-        };
+        let new_node = Node::new(prefix, NodeChildren::from_pairs(pairs), value);
         *self = PackedNode::new(new_node);
     }
 

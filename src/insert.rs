@@ -32,16 +32,12 @@ impl<T> PackedNode<T> {
         let (parent_prefix, suffix) = prefix.split_at(split_at);
         let (&branch, child_prefix) = suffix.split_first().unwrap();
 
-        let new_child = Node {
-            prefix: child_prefix.to_owned(),
-            children: old_children,
-            value: old_value,
-        };
-        let new_parent = Node {
-            prefix: parent_prefix.to_owned(),
-            children: NodeChildren::one(branch, PackedNode::new(new_child)),
-            value: Some(new_value),
-        };
+        let new_child = Node::new(child_prefix.to_owned(), old_children, old_value);
+        let new_parent = Node::new(
+            parent_prefix.to_owned(),
+            NodeChildren::one(branch, PackedNode::new(new_child)),
+            Some(new_value),
+        );
         *self = PackedNode::new(new_parent);
     }
 
@@ -85,26 +81,26 @@ impl<T> PackedNode<T> {
         let (&first_branch, first_prefix) = suffix.split_first().unwrap();
         let (second_branch, second_prefix) = (key_branch, key_remainder);
 
-        let first_child = Node {
-            prefix: first_prefix.to_owned(),
-            children: old_children,
-            value: old_value,
-        };
-        let second_child = Node {
-            prefix: second_prefix.to_owned(),
-            children: NodeChildren::Empty,
-            value: Some(new_value),
-        };
-        let new_parent = Node {
-            prefix: parent_prefix.to_owned(),
-            children: NodeChildren::two(
+        let first_child = Node::new(
+            first_prefix.to_owned(),
+            old_children,
+            old_value,
+        );
+        let second_child = Node::new(
+            second_prefix.to_owned(),
+            NodeChildren::Empty,
+            Some(new_value),
+        );
+        let new_parent = Node::new(
+            parent_prefix.to_owned(),
+            NodeChildren::two(
                 first_branch,
                 PackedNode::new(first_child),
                 second_branch,
                 PackedNode::new(second_child),
             ),
-            value: None,
-        };
+            None,
+        );
         *self = PackedNode::new(new_parent);
     }
 
@@ -136,11 +132,11 @@ impl<T> PackedNode<T> {
         };
         match self.lookup_mut(branch_byte) {
             None => {
-                let new_child = Node {
-                    prefix: key_iter.as_slice().to_owned(),
-                    children: NodeChildren::Empty,
-                    value: Some(value),
-                };
+                let new_child = Node::new(
+                    key_iter.as_slice().to_owned(),
+                    NodeChildren::Empty,
+                    Some(value),
+                );
                 self.add_child(branch_byte, new_child);
                 None
             }
